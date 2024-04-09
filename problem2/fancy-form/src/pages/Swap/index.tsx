@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
-import Button from 'src/components/button';
-import InlineLoading from 'src/components/loading';
-import SelectTokenModal, { ITokenData } from 'src/components/modal/SelectTokenModal';
-import SwapIcon from 'src/icons/SwapIcon';
-import SwapRateBox from './components/SwapRateBox';
-import Title from './components/Title';
-import TokenForm from './components/TokenForm';
+import React, { useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import Button from "src/components/button";
+import InlineLoading from "src/components/loading";
+import SelectTokenModal, { ITokenData } from "src/components/modal/SelectTokenModal";
+import SwapIcon from "src/icons/SwapIcon";
+import SwapRateBox from "./components/SwapRateBox";
+import Title from "./components/Title";
+import TokenForm from "./components/TokenForm";
 
 const Swap: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -14,20 +14,18 @@ const Swap: React.FC = () => {
   const [sourceToken, setSourceToken] = useState<ITokenData | undefined>();
   const [destinationToken, setDestinationToken] = useState<ITokenData | undefined>();
   const [tokenFormSelecting, setTokenFormSelecting] = useState<number>(1);
-  const [sourceAmount, setSourceAmount] = useState<number>(0);
-  const [destinationAmount, setDestinationAmount] = useState<number>(0);
+  const [sourceAmount, setSourceAmount] = useState<string>("");
+  const [destinationAmount, setDestinationAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-
   const swapRate = useMemo(() => {
     if (sourceToken && destinationToken) return sourceToken.price / destinationToken.price;
     return 1;
   }, [sourceToken, destinationToken]);
-
-  const handleSetAmountInput = (value: number, setter: (value: number) => void) => {
+  const handleSetAmountInput = (value: string, setter: (value: string) => void) => {
     setter(value);
     if (sourceToken && destinationToken) {
       const oppositeSetter = setter === setSourceAmount ? setDestinationAmount : setSourceAmount;
-      oppositeSetter(value * swapRate);
+      oppositeSetter("" + Number(value) * swapRate);
     }
   };
 
@@ -36,7 +34,7 @@ const Swap: React.FC = () => {
       (tokenFormSelecting === 1 && token?.currency === destinationToken?.currency) ||
       (tokenFormSelecting === 2 && token?.currency === sourceToken?.currency)
     ) {
-      toast.error('Please select different tokens!');
+      handleSwitchPair();
       return;
     }
 
@@ -48,8 +46,8 @@ const Swap: React.FC = () => {
   };
 
   const handleClearInput = () => {
-    setSourceAmount(0);
-    setDestinationAmount(0);
+    setSourceAmount("");
+    setDestinationAmount("");
   };
 
   const handleReset = () => {
@@ -67,9 +65,7 @@ const Swap: React.FC = () => {
   const handleSwap = () => {
     setLoading(true);
     setTimeout(() => {
-      toast.success(
-        `Successfully swapped ${sourceAmount} ${sourceToken?.currency} to ${destinationAmount} ${destinationToken?.currency}!`
-      );
+      toast.success(`Successfully swapped ${sourceAmount} ${sourceToken?.currency} to ${destinationAmount} ${destinationToken?.currency}!`);
       handleClearInput();
       setLoading(false);
     }, 1200);
@@ -88,8 +84,11 @@ const Swap: React.FC = () => {
           }}
           handleSetAmountInput={(value) => handleSetAmountInput(value, setSourceAmount)}
           amount={sourceAmount}
-          title={sourceToken?.currency || 'Select token'}
+          title={sourceToken?.currency || "Select token"}
           tokenData={sourceToken}
+          handleClearInput={handleClearInput}
+          disabledInput={!sourceToken || !destinationToken}
+          fromToken
         />
 
         <div className="mx-auto w-fit cursor-pointer" onClick={handleSwitchPair} title="Switch Pair">
@@ -103,19 +102,18 @@ const Swap: React.FC = () => {
           }}
           handleSetAmountInput={(value) => handleSetAmountInput(value, setDestinationAmount)}
           amount={destinationAmount}
-          title={destinationToken?.currency || 'Select token'}
+          title={destinationToken?.currency || "Select token"}
           tokenData={destinationToken}
+          handleClearInput={handleClearInput}
+          disabledInput={!sourceToken || !destinationToken}
         />
 
         {sourceToken && destinationToken && (
           <SwapRateBox sourceToken={sourceToken} destinationToken={destinationToken} swapRate={swapRate} />
         )}
 
-        <Button
-          disabled={!sourceToken || !destinationToken || !sourceAmount || !destinationAmount}
-          onClick={handleSwap}
-        >
-          {loading ? <InlineLoading message="Swapping Tokens" /> : 'Swap'}
+        <Button disabled={!sourceToken || !destinationToken || !sourceAmount || !destinationAmount} onClick={handleSwap}>
+          {loading ? <InlineLoading message="Swapping Tokens" /> : "Swap"}
         </Button>
       </div>
     </div>

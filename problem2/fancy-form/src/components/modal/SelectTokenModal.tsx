@@ -60,7 +60,7 @@ const SelectTokenModal: React.FC<ISelectTokenModalProps> = ({ toggleOpen, handle
         value={search}
         onChange={handleSearchChange}
       />
-      <div className="max-h-[450px] overflow-y-auto pr-3">
+      <div className="max-h-[54vh] overflow-y-auto pr-3">
         {tokensListFiltered.map((item: ITokenData, index: number) => (
           <div
             className="flex justify-between items-center my-2 hover:bg-[#1D2939] rounded-md px-1 py-2 cursor-pointer"
